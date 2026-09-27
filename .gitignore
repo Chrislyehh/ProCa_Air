@@ -1,0 +1,85 @@
+# ============================================
+# Carpetas
+# ============================================
+#Carpetas a ignorar
+Literatura_Base/
+# ============================================
+# Datos
+# ============================================
+# Datos crudos: se descargan con el script, no se redistribuyen
+data/raw/
+# Datos intermedios: se regeneran con el pipeline
+data/interim/
+data/processed/
+# Archivos pesados de datos en general
+*.parquet
+*.feather
+*.h5
+*.nc
+
+# Estos SÍ se suben: pronósticos diarios y marcador (registro auditable)
+!data/forecasts/
+!data/forecasts/**
+!data/scoreboard/
+!data/scoreboard/**
+
+# ============================================
+# Modelos entrenados
+# ============================================
+models/*.pkl
+models/*.joblib
+models/*.pt
+models/*.h5
+# Mantener la carpeta en el repo
+!models/.gitkeep
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+.conda/
+
+# ============================================
+# Jupyter
+# ============================================
+.ipynb_checkpoints/
+
+# ============================================
+# Credenciales y configuración local
+# ============================================
+.env
+.env.*
+!.env.example
+*.key
+secrets.*
+
+# ============================================
+# Editores y sistema operativo
+# ============================================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Logs y temporales
+# ============================================
+logs/
+*.log
+tmp/
