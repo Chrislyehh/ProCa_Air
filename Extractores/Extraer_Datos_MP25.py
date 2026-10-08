@@ -1,5 +1,5 @@
 """
-Actualiza los CSV de MP2.5 horario en Datos_Historicos/ con datos del SINCA.
+Actualiza los CSV de MP2.5 horario en Datos/Datos_Historicos/ con datos del SINCA.
 
 Cada archivo se llama <Estacion>.csv (ej: Parque_OHiggins.csv). El script:
   1. Lee la página de la Región Metropolitana del SINCA para obtener el código
@@ -12,9 +12,9 @@ Cada archivo se llama <Estacion>.csv (ej: Parque_OHiggins.csv). El script:
      fecha y hora; las nuevas se agregan.
 
 Uso:
-    python3 Actualizador_de_datos.py                 # actualiza todo
-    python3 Actualizador_de_datos.py --dias-revision 120
-    python3 Actualizador_de_datos.py --completo      # re-descarga todo el historial
+    python3 Extractores/Extraer_Datos_MP25.py                 # actualiza todo
+    python3 Extractores/Extraer_Datos_MP25.py --dias-revision 120
+    python3 Extractores/Extraer_Datos_MP25.py --completo      # re-descarga todo el historial
 """
 
 import argparse
@@ -26,7 +26,7 @@ import urllib.request
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-CARPETA_DATOS = Path(__file__).resolve().parent / "Datos_Historicos"
+CARPETA_DATOS = Path(__file__).resolve().parent.parent / "Datos" / "Datos_Historicos"
 URL_REGION = "https://sinca.mma.gob.cl/index.php/region/index/id/M"
 URL_DESCARGA = (
     "https://sinca.mma.gob.cl/cgi-bin/APUB-MMA/apub.tsindico2.cgi"
