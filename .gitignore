@@ -8,7 +8,7 @@ Datos/pdfs_gec/
 # Datos
 # ============================================
 # Datos crudos: se descargan con el script, no se redistribuyen
-data/raw/
+Datos/
 # Datos intermedios: se regeneran con el pipeline
 data/interim/
 data/processed/
