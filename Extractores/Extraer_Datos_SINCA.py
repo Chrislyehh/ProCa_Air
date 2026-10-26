@@ -41,7 +41,7 @@ import urllib.request
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-CARPETA_DATOS = Path(__file__).resolve().parent.parent / "Datos" / "Datos_Historicos"
+CARPETA_DATOS = Path(__file__).resolve().parent.parent / "Datos" / "Datos_SINCA"
 URL_SINCA = "https://sinca.mma.gob.cl"
 URL_REGION = URL_SINCA + "/index.php/region/index/id/M"
 URL_ESTACION = URL_SINCA + "/index.php/estacion/index/id/{id}"
