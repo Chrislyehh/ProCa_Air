@@ -1,5 +1,6 @@
 """
-Actualiza los CSV horarios de Datos/Datos_Historicos/ con datos del SINCA.
+Actualiza los CSV horarios de Datos/Datos_SINCA/ con datos del SINCA.
+Las estaciones de la Región Metropolitana que aún no tengan archivo se crean.
 
 Cada archivo se llama <Estacion>.csv (ej: Parque_OHiggins.csv) y guarda, como
 columnas, todas las variables de VARIABLES que la estación mida:
@@ -27,9 +28,9 @@ Para no saturar al SINCA se hace una sola llamada a la vez, con una pausa de
 PAUSA segundos entre llamadas (su robots.txt no impone restricciones).
 
 Uso:
-    python3 Extractores/Extraer_Datos_MP25.py                 # actualiza todo
-    python3 Extractores/Extraer_Datos_MP25.py --dias-revision 120
-    python3 Extractores/Extraer_Datos_MP25.py --completo      # re-descarga todo el historial
+    python3 Extractores/Extraer_Datos_SINCA.py                 # actualiza todo
+    python3 Extractores/Extraer_Datos_SINCA.py --dias-revision 120
+    python3 Extractores/Extraer_Datos_SINCA.py --completo      # re-descarga todo el historial
 """
 
 import argparse
@@ -96,12 +97,17 @@ def descargar(url: str, intentos: int = 3) -> str:
             _ultima_llamada = time.monotonic()
 
 
-def normalizar(nombre: str) -> str:
-    """'Parque O'Higgins' -> 'parque_ohiggins'; 'El Bosque (Acreditada)' -> 'el_bosque'."""
+def nombre_archivo(nombre: str) -> str:
+    """'Parque O'Higgins' -> 'Parque_OHiggins'; 'El Bosque (Acreditada)' -> 'El_Bosque'."""
     nombre = re.sub(r"\(.*?\)", "", nombre)
     nombre = unicodedata.normalize("NFKD", nombre).encode("ascii", "ignore").decode()
     nombre = re.sub(r"[^A-Za-z0-9 _]", "", nombre)
-    return re.sub(r"[ _]+", "_", nombre.strip()).lower()
+    return re.sub(r"[ _]+", "_", nombre.strip())
+
+
+def normalizar(nombre: str) -> str:
+    """'Parque O'Higgins' -> 'parque_ohiggins'; 'El Bosque (Acreditada)' -> 'el_bosque'."""
+    return nombre_archivo(nombre).lower()
 
 
 def a_fecha(yymmdd: str) -> date:
@@ -109,12 +115,12 @@ def a_fecha(yymmdd: str) -> date:
 
 
 def obtener_ids_estaciones() -> dict:
-    """Devuelve {nombre_normalizado: id} de las estaciones de la Región Metropolitana."""
+    """Devuelve {nombre_archivo: id} de las estaciones de la Región Metropolitana."""
     pagina = html.unescape(descargar(URL_REGION))
     ids = {}
     for id_, nombre in re.findall(r"estacion/index/id/(\d+)[^>]*>\s*([^<]*?)\s*<", pagina):
         if nombre:
-            ids[normalizar(nombre)] = id_
+            ids[nombre_archivo(nombre)] = id_
     if not ids:
         raise RuntimeError("No se encontraron estaciones en la página del SINCA.")
     return ids
@@ -151,6 +157,8 @@ def obtener_series(id_estacion: str) -> dict:
 def leer_archivo(ruta: Path) -> dict:
     """Lee un CSV propio en {(fecha, hora): {columna: valor}}; acepta archivos con solo algunas columnas."""
     filas = {}
+    if not ruta.exists():
+        return filas
     lineas = ruta.read_text(encoding="latin-1").splitlines()
     if not lineas:
         return filas
@@ -267,16 +275,19 @@ def main() -> None:
     print("Obteniendo estaciones desde el SINCA...")
     ids = obtener_ids_estaciones()
 
-    for ruta in sorted(CARPETA_DATOS.glob("*.csv")):
-        id_estacion = ids.get(normalizar(ruta.stem))
-        if id_estacion is None:
-            print(f"  {ruta.name}: estación no encontrada en el SINCA, se omite.")
-            continue
+    # Las estaciones sin archivo se crean descargando todo su historial.
+    CARPETA_DATOS.mkdir(parents=True, exist_ok=True)
+    existentes = {normalizar(r.stem): r for r in CARPETA_DATOS.glob("*.csv")}
+    for nombre, id_estacion in sorted(ids.items()):
+        ruta = existentes.pop(normalizar(nombre), CARPETA_DATOS / f"{nombre}.csv")
         try:
             series = obtener_series(id_estacion)
             actualizar_archivo(ruta, series, args.dias_revision, args.completo)
         except Exception as e:  # que una estación con problemas no detenga al resto
             print(f"    ERROR en {ruta.name}: {e}")
+
+    for ruta in existentes.values():
+        print(f"  {ruta.name}: estación no encontrada en el SINCA, se omite.")
 
 
 if __name__ == "__main__":
