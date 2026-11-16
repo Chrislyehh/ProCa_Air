@@ -2,6 +2,11 @@
 Actualiza los CSV horarios de Datos/Datos_SINCA/ con datos del SINCA.
 Las estaciones de la Región Metropolitana que aún no tengan archivo se crean.
 
+Solo se descargan estaciones que miden MP2.5 (la variable a pronosticar) con datos desde
+INICIO_MP25 (inicio de los datos de Open-Meteo): una estación sin MP2.5, o cuya serie de MP2.5
+terminó antes, no aporta filas al modelo. Quedan fuera, por ejemplo, La Pintana (no mide MP2.5),
+Cerrillos I, Cerrillos, Quilicura I e Independencia (cerradas o trasladadas antes de 2024).
+
 Cada archivo se llama <Estacion>.csv (ej: Parque_OHiggins.csv) y guarda, como
 columnas, todas las variables de VARIABLES que la estación mida:
   - Contaminantes (MP2.5, MP10, NO, NO2, NOx, O3, CO, SO2): tres columnas cada
@@ -53,6 +58,7 @@ URL_DESCARGA = (
 )
 DIAS_REVISION = 60
 PAUSA = 5  # segundos mínimos entre llamadas al SINCA
+INICIO_MP25 = date(2024, 1, 1)  # la serie de MP2.5 debe tener datos desde esta fecha (inicio de Open-Meteo)
 
 COLUMNAS_FECHA = ["FECHA (YYMMDD)", "HORA (HHMM)"]
 ESTADOS = ["Registros validados", "Registros preliminares", "Registros no validados"]
@@ -282,6 +288,11 @@ def main() -> None:
         ruta = existentes.pop(normalizar(nombre), CARPETA_DATOS / f"{nombre}.csv")
         try:
             series = obtener_series(id_estacion)
+            pm25 = series.get("PM25")
+            if pm25 is None or a_fecha(pm25["hasta"]) < INICIO_MP25:
+                motivo = "no mide MP2.5" if pm25 is None else f"MP2.5 solo hasta {a_fecha(pm25['hasta'])}"
+                print(f"  {nombre}: {motivo}, se omite.")
+                continue
             actualizar_archivo(ruta, series, args.dias_revision, args.completo)
         except Exception as e:  # que una estación con problemas no detenga al resto
             print(f"    ERROR en {ruta.name}: {e}")

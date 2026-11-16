@@ -67,22 +67,20 @@ SEGUNDOS_POR_LLAMADA = 1.0     # pausa por llamada consumida: <= 3.600/hora y 60
 PESO_MAX_PETICION = 60         # llamadas máximas que consume una sola petición
 
 # Coordenadas publicadas en la página de cada estación del SINCA.
-# Los nombres coinciden con los CSV de Datos/Datos_SINCA.
+# Los nombres coinciden con los CSV de Datos/Datos_SINCA. Solo se incluyen estaciones que miden MP2,5
+# y que siguen operando desde 2024 (inicio de los datos de Open-Meteo). Quedan fuera, por no tener
+# mediciones en ese período: Cerrillos_I (hasta 2017), Cerrillos (2017-2022), Quilicura_I (hasta 2016)
+# e Independencia (hasta 2021). La_Pintana no mide MP2,5.
 ESTACIONES = {
-    "Cerrillos": (-33.4958, -70.7043),
-    "Cerrillos_I": (-33.4928, -70.7194),
     "Cerrillos_II": (-33.4946, -70.6933),
     "Cerro_Navia": (-33.4331, -70.7321),
     "El_Bosque": (-33.5499, -70.6765),
-    "Independencia": (-33.4223, -70.6512),
     "La_Florida": (-33.5166, -70.5881),
-    "La_Pintana": (-33.6157, -70.6324),
     "Las_Condes": (-33.3768, -70.5233),
     "Parque_OHiggins": (-33.4641, -70.6608),
     "Pudahuel": (-33.4378, -70.7502),
     "Puente_Alto": (-33.5914, -70.5948),
     "Quilicura": (-33.3496, -70.7238),
-    "Quilicura_I": (-33.3658, -70.7483),
     "Talagante": (-33.6738, -70.9531),
 }
 
